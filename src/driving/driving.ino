@@ -26,7 +26,9 @@ void setup() {
 }
 
 
+
 void loop() {
   stepper.runSpeed();
+  delay(2000);
   myservo.write(45);
 }
