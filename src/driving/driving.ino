@@ -6,6 +6,8 @@
 #define dirPin 2
 #define stepPin 3
 #define motorInterfaceType 1
+int x = 1;
+int y = 1;
 
 // Create a new instance of the AccelStepper class:
 AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
@@ -21,14 +23,20 @@ void setup() {
   stepper.setMaxSpeed(2500);
   stepper.setAcceleration(1000);
   Serial.begin(115200);
-  stepper.setSpeed(2500);
+  stepper.setSpeed(1500);
   myservo.attach(9);  
+  
+  myservo.write(40);
 }
 
 
 
 void loop() {
+  if (millis() > 5000 and y >= 1) {
+    myservo.write(100);
+    stepper.runSpeed();
+    y = y-1;
+  }
   stepper.runSpeed();
-  delay(2000);
-  myservo.write(45);
+  
 }
