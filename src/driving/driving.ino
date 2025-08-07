@@ -8,6 +8,7 @@
 #define motorInterfaceType 1
 int x = 10;
 int y = 1;
+int t;
 
 // Create a new instance of the AccelStepper class:
 AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
@@ -15,33 +16,37 @@ AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
 #include <Servo.h>
 
 Servo myservo;  // create servo object to control a servo
-
+float speed = 2000;
 
 
 void setup() {
   // Set the maximum speed and acceleration:
-  stepper.setMaxSpeed(2500);
-  stepper.setAcceleration(1000);
   Serial.begin(115200);
-  stepper.setSpeed(1500);
+  stepper.setMaxSpeed(speed);
+  stepper.setAcceleration(speed);
+  stepper.setSpeed(speed);
+
+  // Setup steering servo
   myservo.attach(9);  
-  
-  myservo.write(70);
+  // reset to forward
+  myservo.write(100);
+  // delay(2000);
+  t = millis();
 }
 
 
-//myservo.write(70) is straight 
-//myservo.write(40) turns front wheels 30 degrees left
-//myservo.write(100) turns front wheels 30 degrees right etc.
+//myservo.write(100) is straight
 void loop() { 
-  if (millis() > (4000*y) and y <= 4) { //Turns right every 2 seconds for 4 times
-    myservo.write(100); //Going clockwise around the square (Turning right)
+  if (millis() - t >= 1500 && y <= 4) { //Turns right every 2 seconds for 4 times
+    Serial.println(t);
+    myservo.write(50); //Going clockwise around the square (Turning right)
     stepper.runSpeed();
     y = y + 1;
+    t = millis();
   }
 
-  if (millis() > (4000*(y-1) + 3000)) { //Turns wheel straight again after 900ms after turning
-    myservo.write(70);
+  if (millis() - t >= 900 && y <= 5) { //Turns wheel straight again after 1000ms after turning
+    myservo.write(100);
     stepper.runSpeed();
   }
 
