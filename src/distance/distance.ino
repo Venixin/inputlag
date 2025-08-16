@@ -41,7 +41,7 @@ void loop()  {
   digitalWrite(TRIG_PIN, LOW);
   
 
-  long duration= pulseIn(ECHO_PIN, HIGH);
+ long duration= pulseIn(ECHO_PIN, HIGH);
  int distance= duration/29/2;
   if(duration==0){
    Serial.println("Warning: no pulse from sensor");

@@ -28,6 +28,10 @@ int t;
 bool left = false;
 bool right = false;
 bool turned = false;
+const unsigned int TRIG_PIN=13;
+const unsigned int ECHO_PIN=12;
+int dists[5] = {-1,-2,-3,-4,-5};
+int curr = 0;
 
 // Create a new instance of the AccelStepper class:
 AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
@@ -51,6 +55,11 @@ void setup() {
   // reset to forward
   myservo.write(100);
   t = millis();
+
+
+  Serial.begin(9600);
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
   
   while (!huskylens.begin(Wire)) {
     Serial.println("Begin failed!");
@@ -62,6 +71,31 @@ void setup() {
     Serial.print("Failed to set algorithm");
   }
 
+}
+
+
+bool distcheck(int arr[]){
+  if (arr[4] < 0){
+    return false;
+  }
+  int high = 0; int low = 0;
+  for (int i = 0; i < 4; i++){
+    if ((arr[i+1] - arr[i]) > 0){
+      high += 1;
+    }
+    else if (arr[i] < 20){
+      low += 1;
+    }
+    else{
+      high += 1;
+    }
+  }
+  if (low >= high){
+    return true;
+  }
+  else{
+    return false;
+  }
 }
 
 void turn_left(){
@@ -77,6 +111,32 @@ void turn_right(){
 }
 //myservo.write(100) is straight
 void loop() { 
+  //Ultrasonic sensor ping
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN,  HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+
+  long duration= pulseIn(ECHO_PIN, HIGH);
+  int distance= duration/29/2;
+  
+  if(duration==0){
+    Serial.println("Warning: no pulse from sensor");
+  }  
+  else{
+    Serial.println(distance);
+    if (curr >= 5){
+      curr = 0; 
+    }
+    dists[curr] = distance;
+    curr += 1;
+    }
+  if (distcheck(dists)){
+    Serial.println("hello");
+    turn_left();
+    }
+
   if (huskylens.request()) {
     if (huskylens.count(1) > 0 && left == false){
         Serial.println("RED");
@@ -115,6 +175,7 @@ void loop() {
       turned = true;
     }
   }
+
   if (millis()-t > 200){
     Serial.println("RED");
     display(4);
@@ -123,6 +184,7 @@ void loop() {
     Serial.println();
     t = millis();
   }
+
   stepper.runSpeed();
   
 }
