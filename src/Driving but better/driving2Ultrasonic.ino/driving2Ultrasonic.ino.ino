@@ -52,7 +52,7 @@ float speed = 2000;
 void setup() {
   pingTimer = millis();
   // Set the maximum speed and acceleration:
-  Serial.begin(115200);
+  Serial.begin(9600);
   Wire.begin();
   stepper.setMaxSpeed(speed);
   stepper.setAcceleration(speed);
@@ -62,6 +62,7 @@ void setup() {
   myservo.attach(9);
   // reset to forward
   myservo.write(100);
+  delay(1000);
   t = millis();
 
   pinMode(TRIG_PIN, OUTPUT);
@@ -129,68 +130,33 @@ long echoCheck() {  // Timer2 interrupt calls this function every 24uS where you
 //myservo.write(100) is straight
 void loop() {
 
+    //Ultrasonic sensor ping
+    if (millis() >= pingTimer) {    // pingSpeed milliseconds since last ping, do another ping.
+      pingTimer += pingSpeed;       // Set the next ping time.
+      sonar.ping_timer(echoCheck);  // Send out the ping, calls "echoCheck" function every 24uS where you can check the ping status.
+    }
 
-  //Ultrasonic sensor ping
-  if (millis() >= pingTimer) {    // pingSpeed milliseconds since last ping, do another ping.
-    pingTimer += pingSpeed;       // Set the next ping time.
-    sonar.ping_timer(echoCheck);  // Send out the ping, calls "echoCheck" function every 24uS where you can check the ping status.
-  }
+    if (curr >= 5) {
+      curr = 0;
+    }
+    dists[curr] = distance;
+    curr += 1;
+    // Serial.println(distance);
 
-  if (curr >= 5) {
-    curr = 0;
-  }
-  dists[curr] = distance;
-  curr += 1;
+    stepper.runSpeed();
+    if (distcheck(dists) && !turned) {
+      myservo.write(50);
+      // Serial.println("turn");
+      turned = true;
+      t = millis();
+    }
 
+    if (millis() - t >= 900 && !distcheck(dists)) {
+      myservo.write(100);
+      stepper.runSpeed();
+      turned = false;
+    }
+  
 
-stepper.runSpeed();
-if (distcheck(dists)) {
-  turn_left();
-  turned = true;
-}
-// if (huskylens.request()) {
-//   if (huskylens.count(1) > 0 && left == false) {
-//     Serial.println("RED");
-//     turn_left();
-//     t = millis();
-//   }
-//   if (huskylens.count(2) > 0 && right == false) {
-//     Serial.println("BLUE");
-//     turn_right();
-//     t = millis();
-//   }
-// }
-
-
-if (millis() - t >= 1800 && turned) {
-  myservo.write(100);
   stepper.runSpeed();
-  turned = false;
-  left = false;
-  right = false;
-
-  t = millis();
-}
-
-if (millis() - t >= 900 && millis() - t < 1800) {
-  if (left) {
-    myservo.write(125);
-    stepper.runSpeed();
-    turned = true;
-  } else if (right) {
-    myservo.write(75);
-    stepper.runSpeed();
-    turned = true;
-  }
-}
-
-if (millis() - t > 200) {
-  // Serial.println("RED");
-  display(4);
-  // Serial.println("GREEN");
-  display(3);
-  t = millis();
-}
-
-stepper.runSpeed();
 }
