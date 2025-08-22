@@ -5,25 +5,13 @@
 #include <AccelStepper.h>
 HUSKYLENS huskylens;
 
-void printResult(HUSKYLENSResult result) {
-  if (result.command == COMMAND_RETURN_BLOCK) {
-    Serial.println(String() + F("Block:xCenter=") + result.xCenter + F(",yCenter=") + result.yCenter + F(",width=") + result.width + F(",height=") + result.height + F(",ID=") + result.ID);
-  }
-}
-void display(int id) {
-  int count = huskylens.count(id);
-  for (int i = 0; i < count; i++) {
-    HUSKYLENSResult result = huskylens.getBlock(id, i);
-    printResult(result);
-  }
-}
 // Define stepper motor connections and motor interface type.
 // Motor interface type must be set to 1 when using a driver:
 #define dirPin 2
 #define stepPin 3
 #define motorInterfaceType 1
 #define redID 4
-#define blueID 3
+#define greenID 3
 int x = 10;
 int y = 1;
 int t;
@@ -35,10 +23,14 @@ const unsigned int ECHO_PIN = 12;
 int dists[5] = { -1, -2, -3, -4, -5 };
 int curr = 0;
 int redCount = 0;
-int blueCount = 0;
+int greenCount = 0;
 int a = 0;
-int blueCurr = 0;
+int greenCurr = 0;
 int redCurr = 0;
+bool recheck = false;
+bool left90 = false;
+bool right90 = false;
+bool middle = false;
 // Create a new instance of the AccelStepper class:
 AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
 
@@ -85,58 +77,89 @@ void turn_right() {
   stepper.runSpeed();
 }
 
+void right_90() {
+  myservo.write(150);
+  stepper.runSpeed();
+}
 
+void left_90() {
+  myservo.write(50);
+  stepper.runSpeed();
+}
 // myservo.write(100) is straight
 void loop() {
   stepper.runSpeed();
-  
-  if (huskylens.requestBlocks()) {
-    
-    // double angle = tan(y/x);
-    // double adjusted_x = y / atan(angle);
-    // if (120 <= adjusted_x <= 200) {
-    //   move();
-    // }
-    
-    redCurr = huskylens.count(redID);
-    blueCurr = huskylens.count(blueID);
-    if (left == false) {
-      if (redCurr > redCount) {
-        turn_left();
-        t = millis();
-      }
-      redCount = redCurr;
-    }
-    if (right == false) {
-      if (blueCurr > blueCount) {
+  if (recheck && millis() % 2000 == 0) {
+    if (huskylens.requestBlocks()) {
+      redCount = huskylens.count(redID);
+      greenCount = huskylens.count(greenID);
+      if (redCount > 1) {
         turn_right();
-        t = millis();
+      } else if (greenCount > 1) {
+        turn_left()
+      } else if (redCount == 1 && greenCount == 1) {
+        get results and check which is closer
+          HUSKYLENSResult redResult = huskylens.getBlock(redID, i);
+        HUSKYLENSResult greenResult = huskylens.getBlock(greenID, i);
+        if (redResult.yCenter < greenResult.yCenter) {
+          turn_left();
+          left90 = true;
+        } else if (redResult.yCenter > greenResult.yCenter) {
+          turn_right();
+          right90 = true;
+        } else {
+          recheck = true;
+        }
+      } else {
+        recheck = true;
       }
-      blueCount = blueCurr;
     }
   }
-  else{
-    stepper.runSpeed();
-  }
-
-  if (millis() - t >= 5000 && (left || right)) {
-    myservo.write(100);
-    stepper.runSpeed();
-    turned = true;
-  }
-  if (turned){
-    if (left){
+  if (millis() - t >= 5000 && !middle) {
+    if (left) {
       myservo.write(125);
-    }
-    else if (right){
+    } else if (right) {
       myservo.write(75);
     }
-    if (millis() - t >= 10000){
+    else if (left90){
+      myservo.write(50);
+    }
+    else if (right90){
+      myservo.write(150);
+    }
+    middle = true;
+  }
+  if (millis() - t >= 10000){
+    if (left || right){
       myservo.write(100);
-      turned = false;
-      left = false;
-      right = false;
     }
   }
+  if (millis() - t >= 15000){
+    if (left90){
+      myservo.write(150);
+    }
+    else if (right90){
+      myservo.write(50);
+    }
+    turned = true;
+  }
+  if (millis() - t >= 20000 && turned){
+     if (left90){
+      myservo.write(125);
+    }
+    else if (right90){
+      myservo.write(75);
+    }
+  }
+
+  if (millis()-t >= 25000){
+    left = false;
+    right = false;
+    left90 = false;
+    right90 = false;
+    turned = false;
+    // go forward then turn left or right based on the lines
+  }
+
   stepper.runSpeed();
 }
