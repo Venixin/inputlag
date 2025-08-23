@@ -97,17 +97,19 @@ void loop() {
         turn_right();
         recheck = false;
       } else if (greenCount > 1) {
-        turn_left()
+        turn_left();
           recheck = false;
       } else if (redCount == 1 && greenCount == 1) {
         //get results and check which is closer
-        HUSKYLENSResult redResult = huskylens.getBlock(redID, i);
-        HUSKYLENSResult greenResult = huskylens.getBlock(greenID, i);
-        if (redResult.yCenter < greenResult.yCenter) {
+        HUSKYLENSResult redResult = huskylens.getBlock(redID, 0);
+        HUSKYLENSResult greenResult = huskylens.getBlock(greenID, 0);
+        int redArea = redResult.width * redResult.height;
+        int greenArea = greenResult.width * greenResult.height;
+        if (redResult.yCenter < greenResult.yCenter && redArea < greenArea) {
           turn_left();
           left90 = true;
           recheck = false;
-        } else if (redResult.yCenter > greenResult.yCenter) {
+        } else if (redResult.yCenter > greenResult.yCenter && redArea < greenArea) {
           turn_right();
           right90 = true;
           recheck = false;
