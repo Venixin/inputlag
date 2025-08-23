@@ -199,4 +199,86 @@ In the main loop, we constantly request the HuskyLens for detected objects, and 
     }
   }
 ```
-In the case that the HuskyLens sees multiple traffic cones, it uses the width and height of the detected objects to calculate their corresponding areas to compare which cone is further.
+In the case that the HuskyLens sees multiple traffic cones, it uses the width and height of the detected objects to calculate their corresponding areas to compare which cone is further. After determining the correct traffic cone to follow, it then calls the corresponding turn function to allow the robot to navigate past the cone successfully.
+
+```
+ if (millis() - t >= 5000 && !middle) {
+    if (left) {
+      myservo.write(125);
+    } else if (right) {
+      myservo.write(75);
+    } else if (left90) {
+      myservo.write(50);
+    } else if (right90) {
+      myservo.write(150);
+    }
+    middle = true;
+  }
+  if (millis() - t >= 10000) {
+    if (left || right) {
+      myservo.write(100);
+    }
+  }
+  if (millis() - t >= 15000) {
+    if (left90) {
+      myservo.write(150);
+    } else if (right90) {
+      myservo.write(50);
+    }
+    turned = true;
+  }
+  if (millis() - t >= 20000 && turned) {
+    if (left90) {
+      myservo.write(125);
+    } else if (right90) {
+      myservo.write(75);
+    }
+  }
+```
+
+After it has successfully navigated around the obstacle, the robot then turns in the opposite direction to realign itself to face forwards again
+
+```
+  if (millis() - t >= 5000 && !middle) {
+    if (left) {
+      myservo.write(125);
+    } else if (right) {
+      myservo.write(75);
+    } else if (left90) {
+      myservo.write(50);
+    } else if (right90) {
+      myservo.write(150);
+    }
+    middle = true;
+  }
+  if (millis() - t >= 10000) {
+    if (left || right) {
+      myservo.write(100);
+    }
+  }
+  if (millis() - t >= 15000) {
+    if (left90) {
+      myservo.write(150);
+    } else if (right90) {
+      myservo.write(50);
+    }
+    turned = true;
+  }
+  if (millis() - t >= 20000 && turned) {
+    if (left90) {
+      myservo.write(125);
+    } else if (right90) {
+      myservo.write(75);
+    }
+  }
+
+  if (millis() - t >= 25000) {
+    left = false;
+    right = false;
+    left90 = false;
+    right90 = false;
+    turned = false;
+  }
+```
+
+
