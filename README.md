@@ -53,18 +53,28 @@ The robot's mobility is managed by a combination of the chassis, powertrain and 
 We used 2 NEMA 17 Stepper Motors to act as our main driving force, and to control the speed of the steppers, we utilised a TB6600 Stepper Motor Driver
 <br>
 <p align = "center">
-    <img src='./other/TB6600%20stepper%20motor%20driver.jpg' alt='Stepper Driver' width ='500'/>
+    <img src='./other/TB6600%20stepper%20motor%20driver.jpg' alt='Stepper Driver' width ='400'/>
 </p>
 
 ## Steering
 After experimenting with various steering mechanisms, we decided to settle for a simple yet efficient system of front wheel steering. We chose to use a MG996R servo motor as our key component, favouring it for its wide range of mobility and fast response. The servo is connected pointing downwards to a system of two axles, allowing for a full 360 degrees of rotation.
-![MG996R](./other/MG996R%20Servo.jpg)
-![Axle](./other/axle.png)
+<br>
+<p align = "center">
+    <img src='./other/MG996R Servo.jpg' alt='Servo' width ='400'/>
+</p>
+<br>
+<p align = "center">
+    <img src='./other/axle.png' alt='Axle' width ='400'/>
+</p>
+
 
 ## Chasis
 To maximise speed, we decided to use an entirely 3D-printed chassis after discussion. This allowed our robot to become more lightweight and compact as compared to previous iterations.
 The chassis makes use of a simple streamlined shape, consisting of an elevated platform on the back to house the arduino, and allow for more room for wiring. The front of the chassis has a hole to accomodate the MG996R servo and steering system. The battery pack and HuskyLens are also situated at the front of the chassis.
-![Chassis](./other/rc%20body.png)
+<br>
+<p align = "center">
+    <img src='./other/rc body.png' alt='Chassis' width ='400'/>
+</p>
 
 
 # Power and Input Management
