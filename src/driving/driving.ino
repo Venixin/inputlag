@@ -27,10 +27,11 @@ int redCount = 0;
 int greenCount = 0;
 int lineCount = 0;
 int a = 0;
-bool recheck = false;
+bool recheck = true;
 bool left90 = false;
 bool right90 = false;
 bool middle = false;
+int n=0;
 // Create a new instance of the AccelStepper class:
 AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
 
@@ -62,49 +63,55 @@ void setup() {
   if (!huskylens.writeAlgorithm(ALGORITHM_COLOR_RECOGNITION)) {
     Serial.print("Failed to set algorithm");
   }
-  huskylens.setTimeOutDuration(1);
+  delay(2000);
+  Serial.println("PLEASE");
 }
 
 void turn_left() {
+
+  Serial.println("l");
   left = true;
   myservo.write(75);
   stepper.runSpeed();
 }
 
 void turn_right() {
+  Serial.println("r");
   right = true;
   myservo.write(125);
   stepper.runSpeed();
 }
 
 void right_90() {
+  Serial.println("aaa");
   myservo.write(150);
   stepper.runSpeed();
 }
 
 void left_90() {
+  Serial.println("bbb");
   myservo.write(50);
   stepper.runSpeed();
 }
 // myservo.write(100) is straight
 void loop() {
   stepper.runSpeed();
-  if (recheck && millis() % 2000 == 0){
-    if (huskylens.requestBlocks()){
-      huskylens.count(lineID);
-    }
-  }
+  n+=1;
 
-  if (recheck && millis() % 2000 == 0) {
+
+  if (recheck && (n % 2000 == 0 && n != 0)) {
+    Serial.println(n);
     if (huskylens.requestBlocks()) {
       redCount = huskylens.count(redID);
       greenCount = huskylens.count(greenID);
       if (redCount > 1) {
         turn_right();
         recheck = false;
+        t = millis();
       } else if (greenCount > 1) {
         turn_left();
-          recheck = false;
+        recheck = false;
+        t = millis();
       } else if (redCount == 1 && greenCount == 1) {
         //get results and check which is closer
         HUSKYLENSResult redResult = huskylens.getBlock(redID, 0);
@@ -115,10 +122,12 @@ void loop() {
           turn_left();
           left90 = true;
           recheck = false;
+          t = millis();
         } else if (redResult.yCenter > greenResult.yCenter && redArea < greenArea) {
           turn_right();
           right90 = true;
           recheck = false;
+          t = millis();
         } else {
           recheck = true;
         }
@@ -128,10 +137,11 @@ void loop() {
     }
   }
   if (millis() - t >= 5000 && !middle) {
+    Serial.println(left90);
     if (left) {
-      myservo.write(125);
+      myservo.write(100);
     } else if (right) {
-      myservo.write(75);
+      myservo.write(100);
     } else if (left90) {
       myservo.write(50);
     } else if (right90) {
@@ -139,28 +149,36 @@ void loop() {
     }
     middle = true;
   }
-  if (millis() - t >= 10000) {
+  if (millis() - t >= 10000 && !turned) {
+    Serial.println("b");
     if (left || right) {
-      myservo.write(100);
+      myservo.write(75);
     }
   }
   if (millis() - t >= 15000) {
+    Serial.println("c");
     if (left90) {
       myservo.write(150);
     } else if (right90) {
       myservo.write(50);
     }
+    else{
+      myservo.write(100);
+    }
     turned = true;
   }
   if (millis() - t >= 20000 && turned) {
+    Serial.println("d");
     if (left90) {
       myservo.write(125);
     } else if (right90) {
       myservo.write(75);
     }
+    turned = false;
   }
 
   if (millis() - t >= 25000) {
+    Serial.println("e");
     left = false;
     right = false;
     left90 = false;
