@@ -23,6 +23,9 @@ This repository contains engineering materials of the inputlag team's self-drive
 ### Loh Zheng Xiang
 
 
+## Team Photo
+
+
 ## The Challenge 
 
 The **[WRO 2024 Future Engineers - Self-Driving Cars](https://wro-association.org/)** challenge invites teams to design, build, and program a vehicle capable of driving autonomously on a racetrack. The competition includes two main tasks: completing laps while navigating randomized obstacles and successfully performing a precise parallel parking maneuver. Teams must integrate advanced robotics concepts such as computer vision, sensor fusion, and kinematics, focusing on innovation and reliability.
@@ -50,7 +53,11 @@ The robot's mobility is managed by a combination of the chassis, powertrain and 
 
 
 ## Powertrain
-We used 2 NEMA 17 Stepper Motors to act as our main driving force, and to control the speed of the steppers, we utilised a TB6600 Stepper Motor Driver
+We used 2 NEMA 17 Stepper Motors to act as our main driving force, and to control the speed of the steppers, we utilised a TB6600 Stepper Motor Driver.
+<br>
+<p align = "center">
+    <img src='./other/NEMA 17.jpg' alt='Stepper Motor' width ='400'/>
+</p>
 <br>
 <p align = "center">
     <img src='./other/TB6600%20stepper%20motor%20driver.jpg' alt='Stepper Driver' width ='400'/>
@@ -295,3 +302,5 @@ After it has successfully navigated around the obstacle, the robot then turns in
 ```
 
 
+# Parking procedure 
+TBA
