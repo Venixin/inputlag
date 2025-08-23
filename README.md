@@ -51,6 +51,7 @@ The robot's mobility is managed by a combination of the chassis, powertrain and 
 
 ## Powertrain
 We used 2 NEMA 17 Stepper Motors to act as our main driving force, and to control the speed of the steppers, we utilised a TB6600 Stepper Motor Driver
+<br>
 <img src = './other/TB6600%20stepper%20motor%20driver.jpg' alt = 'Stepper Driver' width = "500"/>
 
 ## Steering
