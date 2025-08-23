@@ -95,18 +95,22 @@ void loop() {
       greenCount = huskylens.count(greenID);
       if (redCount > 1) {
         turn_right();
+        recheck = false;
       } else if (greenCount > 1) {
         turn_left()
+          recheck = false;
       } else if (redCount == 1 && greenCount == 1) {
-        get results and check which is closer
-          HUSKYLENSResult redResult = huskylens.getBlock(redID, i);
+        //get results and check which is closer
+        HUSKYLENSResult redResult = huskylens.getBlock(redID, i);
         HUSKYLENSResult greenResult = huskylens.getBlock(greenID, i);
         if (redResult.yCenter < greenResult.yCenter) {
           turn_left();
           left90 = true;
+          recheck = false;
         } else if (redResult.yCenter > greenResult.yCenter) {
           turn_right();
           right90 = true;
+          recheck = false;
         } else {
           recheck = true;
         }
@@ -120,39 +124,35 @@ void loop() {
       myservo.write(125);
     } else if (right) {
       myservo.write(75);
-    }
-    else if (left90){
+    } else if (left90) {
       myservo.write(50);
-    }
-    else if (right90){
+    } else if (right90) {
       myservo.write(150);
     }
     middle = true;
   }
-  if (millis() - t >= 10000){
-    if (left || right){
+  if (millis() - t >= 10000) {
+    if (left || right) {
       myservo.write(100);
     }
   }
-  if (millis() - t >= 15000){
-    if (left90){
+  if (millis() - t >= 15000) {
+    if (left90) {
       myservo.write(150);
-    }
-    else if (right90){
+    } else if (right90) {
       myservo.write(50);
     }
     turned = true;
   }
-  if (millis() - t >= 20000 && turned){
-     if (left90){
+  if (millis() - t >= 20000 && turned) {
+    if (left90) {
       myservo.write(125);
-    }
-    else if (right90){
+    } else if (right90) {
       myservo.write(75);
     }
   }
 
-  if (millis()-t >= 25000){
+  if (millis() - t >= 25000) {
     left = false;
     right = false;
     left90 = false;
