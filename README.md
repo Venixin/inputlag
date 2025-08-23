@@ -51,7 +51,7 @@ The robot's mobility is managed by a combination of the chassis, powertrain and 
 
 ## Powertrain
 We used 2 NEMA 17 Stepper Motors to act as our main driving force, and to control the speed of the steppers, we utilised a TB6600 Stepper Motor Driver
-<img src = '.other/TB6600%20stepper%20motor%20driver.jpg' alt = 'Stepper Driver' width = "500">
+<img src = '.other/TB6600%20stepper%20motor%20driver.jpg' alt = 'Stepper Driver' width = "500"/>
 
 ## Steering
 After experimenting with various steering mechanisms, we decided to settle for a simple yet efficient system of front wheel steering. We chose to use a MG996R servo motor as our key component, favouring it for its wide range of mobility and fast response. The servo is connected pointing downwards to a system of two axles, allowing for a full 360 degrees of rotation.
