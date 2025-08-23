@@ -12,6 +12,7 @@ HUSKYLENS huskylens;
 #define motorInterfaceType 1
 #define redID 4
 #define greenID 3
+#define lineID 5
 int x = 10;
 int y = 1;
 int t;
@@ -24,9 +25,8 @@ int dists[5] = { -1, -2, -3, -4, -5 };
 int curr = 0;
 int redCount = 0;
 int greenCount = 0;
+int lineCount = 0;
 int a = 0;
-int greenCurr = 0;
-int redCurr = 0;
 bool recheck = false;
 bool left90 = false;
 bool right90 = false;
@@ -89,6 +89,12 @@ void left_90() {
 // myservo.write(100) is straight
 void loop() {
   stepper.runSpeed();
+  if (recheck && millis() % 2000 == 0){
+    if (huskylens.requestBlocks()){
+      huskylens.count(lineID);
+    }
+  }
+
   if (recheck && millis() % 2000 == 0) {
     if (huskylens.requestBlocks()) {
       redCount = huskylens.count(redID);
