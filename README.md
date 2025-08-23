@@ -13,12 +13,8 @@ This repository contains engineering materials of the inputlag team's self-drive
 * `models` is for the files for models used by 3D printers, laser cutting machines and CNC machines to produce the vehicle elements. If there is nothing to add to this location, the directory can be removed.
 * `other` is for other files which can be used to understand how to prepare the vehicle for the competition. It may include documentation how to connect to a SBC/SBM and upload files there, datasets, hardware specifications, communication protocols descriptions etc. If there is nothing to add to this location, the directory can be removed.
 
-## Introduction
 
-_This part must be filled by participants with the technical clarifications about the code: which modules the code consists of, how they are related to the electromechanical components of the vehicle, and what is the process to build/compile/upload the code to the vehicle’s controllers._
-
-
-## The Team
+## Meet The Team
 
 ### Ansel Kee Jun Xi
 
@@ -55,13 +51,17 @@ The robot's mobility is managed by a combination of the chassis, powertrain and 
 
 ## Powertrain
 We used 2 NEMA 17 Stepper Motors to act as our main driving force, and to control the speed of the steppers, we utilised a TB6600 Stepper Motor Driver
+![TB6600 Driver](./other/TB6600%20stepper%20motor%20driver.jpg)
 
 ## Steering
 After experimenting with various steering mechanisms, we decided to settle for a simple yet efficient system of front wheel steering. We chose to use a MG996R servo motor as our key component, favouring it for its wide range of mobility and fast response. The servo is connected pointing downwards to a system of two axles, allowing for a full 360 degrees of rotation.
+![MG996R](./other/MG996R%20Servo.jpg)
+![Axle](./other/axle.png)
 
 ## Chasis
 To maximise speed, we decided to use an entirely 3D-printed chassis after discussion. This allowed our robot to become more lightweight and compact as compared to previous iterations.
 The chassis makes use of a simple streamlined shape, consisting of an elevated platform on the back to house the arduino, and allow for more room for wiring. The front of the chassis has a hole to accomodate the MG996R servo and steering system. The battery pack and HuskyLens are also situated at the front of the chassis.
+![Chassis](./other/rc%20body.png)
 
 
 # Power and Input Management
