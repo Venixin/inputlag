@@ -35,7 +35,7 @@ bool middle = false;
 AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
 
 Servo myservo;  // create servo object to control a servo
-float speed = 4000;
+float speed = 2000;
 
 
 void setup() {
@@ -95,10 +95,12 @@ void loop() {
       greenCount = huskylens.count(greenID);
       if (redCount > 1) {
         turn_right();
+        Serial.println("1");
         recheck = false;
       } else if (greenCount > 1) {
         turn_left();
-          recheck = false;
+        recheck = false;
+        Serial.println("2");
       } else if (redCount == 1 && greenCount == 1) {
         //get results and check which is closer
         HUSKYLENSResult redResult = huskylens.getBlock(redID, 0);
@@ -109,10 +111,12 @@ void loop() {
           turn_left();
           left90 = true;
           recheck = false;
+          Serial.println("3");
         } else if (redResult.yCenter > greenResult.yCenter && redArea < greenArea) {
           turn_right();
           right90 = true;
           recheck = false;
+          Serial.println("4");
         } else {
           recheck = true;
         }
