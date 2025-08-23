@@ -41,6 +41,7 @@ Points are awarded based on performance in the challenge rounds, quality of the 
 Learn more about the challenge [here](https://wro-association.org/wp-content/uploads/WRO-2024-Future-Engineers-Self-Driving-Cars-General-Rules.pdf).
 
 
+
 ## Photos of our Robot
 //Insert photos here
 
@@ -60,16 +61,142 @@ After experimenting with various steering mechanisms, we decided to settle for a
 
 ## Chasis
 To maximise speed, we decided to use an entirely 3D-printed chassis after discussion. This allowed our robot to become more lightweight and compact as compared to previous iterations.
-The chassis makes use of a simple streamlined shape, consisting of an elevated platform on the back to house the arduino, and allow for more room for wiring. The front of the chassis has a hole to accomodate the MG996R servo.
+The chassis makes use of a simple streamlined shape, consisting of an elevated platform on the back to house the arduino, and allow for more room for wiring. The front of the chassis has a hole to accomodate the MG996R servo and steering system. The battery pack and HuskyLens are also situated at the front of the chassis.
+
+
+# Power and Input Management
+The vehicle uses a battery pack consisting of 4 3.7V 18650 batteries. 
+These batteries are used to power the stepper motors and stepper motor driver.
+The rest of the components draw power from an Arduino Uno, which also serves as the main microcontroller for all of the robot's inputs and motors.
+The robot draws information about its surroundings through a HuskyLens AI Machine Vision Sensor for visual input, and a MPU-6050, which serves as a gyroscope.
 
 
 
+# Program Flow
+Our program consists of 3 main functions:
+1. Steering
+2. Driving
+3. Obstacle and Wall Detection
 
 
+## Steering
+We utilised the Servo.h library, which provides the necessary functions to manage the servo movements. We initialise a servo object and attached it to pin 9 on the Arduino. We then set the angle of the servo to the default starting position, which is facing forward.
+
+```
+// Setup steering servo
+myservo.attach(9);
+// reset to forward
+myservo.write(100);
+```
+
+We then also define functions that turn the servo either left or right, by setting the value of the servo using servo.write().
+This is to allow for easier readabilit and convenience, due to the frequency which we will be requiring the servo to turn in either direction.
+```
+void turn_left() {
+  left = true;
+  myservo.write(75);
+  stepper.runSpeed();
+}
+
+void turn_right() {
+  right = true;
+  myservo.write(125);
+  stepper.runSpeed();
+}
+
+void right_90() {
+  myservo.write(150);
+  stepper.runSpeed();
+}
+
+void left_90() {
+  myservo.write(50);
+  stepper.runSpeed();
+}
+```
 
 
+## Driving
+To control the stepper motors, we use the AccelStepper.h library. We create a stepper object by initialising it with the corresponding step and direction pins, as well as setting a fixed speed value.
+```
+#define dirPin 2
+#define stepPin 3
+AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
+float speed = 4000;
+```
+
+Afterwards we just call the `stepper.runSpeed()` function every loop to ensure that the steppers can constantly turn the wheels and run the vehicle at a steady pace.
 
 
+## Obstacle and Wall Detection
+First, we set the speed of the stepper, and turn on the HuskyLens and switch to the color recognition algorithm.
+```
+void setup() {
+  // Set the maximum speed and acceleration:
+  // Serial.begin(115200);
+  Wire.begin();
+  stepper.setMaxSpeed(speed);
+  stepper.setAcceleration(speed);
+  stepper.setSpeed(speed);
+
+  // Setup steering servo
+  myservo.attach(9);
+  // reset to forward
+  myservo.write(100);
+  t = millis();
+
+  Serial.begin(9600);
+  while (!huskylens.begin(Wire)) {
+    Serial.println("Begin failed!");
+    Serial.println("1.Please recheck the \"Protocol Type\" in HUSKYLENS (General Settings>>Protocol Type>> I2C)");
+    Serial.println("2.Please recheck the connection.");
+    delay(1000);
+  }
+  if (!huskylens.writeAlgorithm(ALGORITHM_COLOR_RECOGNITION)) {
+    Serial.print("Failed to set algorithm");
+  }
+  huskylens.setTimeOutDuration(1);
+}
+```
+
+We use the millis() function to act as a pseudo timer, as it records the time in milliseconds from which the program starts running, which will allow use to time several other functions.
 
 
+In the main loop, we constantly request the HuskyLens for detected objects, and check for the amount of red and green blocks that it can see.
 
+```
+  stepper.runSpeed();
+  if (recheck && millis() % 2000 == 0) {
+    if (huskylens.requestBlocks()) {
+      redCount = huskylens.count(redID);
+      greenCount = huskylens.count(greenID);
+      if (redCount > 1) {
+        turn_right();
+        recheck = false;
+      } else if (greenCount > 1) {
+        turn_left();
+          recheck = false;
+      } else if (redCount == 1 && greenCount == 1) {
+        //get results and check which is closer
+        HUSKYLENSResult redResult = huskylens.getBlock(redID, 0);
+        HUSKYLENSResult greenResult = huskylens.getBlock(greenID, 0);
+        int redArea = redResult.width * redResult.height;
+        int greenArea = greenResult.width * greenResult.height;
+        if (redResult.yCenter < greenResult.yCenter && redArea < greenArea) {
+          turn_left();
+          left90 = true;
+          recheck = false;
+        } else if (redResult.yCenter > greenResult.yCenter && redArea < greenArea) {
+          turn_right();
+          right90 = true;
+          recheck = false;
+        } else {
+          recheck = true;
+        }
+      } else {
+        recheck = true;
+      }
+    }
+  }
+```
+In the case that the HuskyLens sees multiple traffic cones, it uses the width and height of the detected objects to calculate their corresponding areas to compare which cone is further.
