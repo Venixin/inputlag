@@ -9,6 +9,7 @@
 int x = 10;
 int y = 1;
 unsigned long t;
+bool left = true;
 
 // Create a new instance of the AccelStepper class:
 AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
@@ -37,11 +38,29 @@ void setup() {
 
 //myservo.write(100) is straight
 void loop() { 
-  if (millis() - t >= 2500) { //Turns right every 2 seconds for 4 times
+  if (millis() - t >= 10000 && y%2==0) { //Turns right every 2 seconds for 4 times
     Serial.println(1);
-    myservo.write(55); //Going clockwise around the square (Turning right)
+    if (left){
+      myservo.write(55);
+    }
+    else{
+      myservo.write(145);
+    }
     stepper.runSpeed();
-    // y = y + 1;
+    y = y + 1;
+    Serial.print(millis()-t);
+    t = millis();
+  }
+  if (millis() - t >= 7500 && y%2==1) { //Turns right every 2 seconds for 4 times
+    Serial.println(1);
+    if (left){
+      myservo.write(55);
+    }
+    else{
+      myservo.write(145);
+    }//Going clockwise around the square (Turning right)
+    stepper.runSpeed();
+    y = y + 1;
     Serial.print(millis()-t);
     t = millis();
   }
@@ -49,8 +68,6 @@ void loop() {
   if (millis() - t >= 1050) { //Turns wheel straight again after 1000ms after turning
     myservo.write(100);
     stepper.runSpeed();
-    Serial.print(millis()-t);
-    Serial.println(2);
   }
   // myservo.write(70);
   stepper.runSpeed();
