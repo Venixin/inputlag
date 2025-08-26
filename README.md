@@ -3,16 +3,6 @@ inputlag 2025
 
 This repository contains engineering materials of the inputlag team's self-driven vehicle's model participating in the World Robotics Olympiad Future Engineers competition. The robot was designed and built by a team of three students.
 
-## Content
-
-* `t-photos` contains 2 photos of the team (an official one and one funny photo with all team members)
-* `v-photos` contains 6 photos of the vehicle (from every side, from top and bottom)
-* `video` contains the video.md file with the link to a video where driving demonstration exists
-* `schemes` contains one or several schematic diagrams in form of JPEG, PNG or PDF of the electromechanical components illustrating all the elements (electronic components and motors) used in the vehicle and how they connect to each other.
-* `src` contains code of control software for all components which were programmed to participate in the competition
-* `models` is for the files for models used by 3D printers, laser cutting machines and CNC machines to produce the vehicle elements. If there is nothing to add to this location, the directory can be removed.
-* `other` is for other files which can be used to understand how to prepare the vehicle for the competition. It may include documentation how to connect to a SBC/SBM and upload files there, datasets, hardware specifications, communication protocols descriptions etc. If there is nothing to add to this location, the directory can be removed.
-
 
 ## Meet The Team
 
@@ -62,6 +52,7 @@ We used 2 NEMA 17 Stepper Motors to act as our main driving force, and to contro
 <p align = "center">
     <img src='./other/TB6600%20stepper%20motor%20driver.jpg' alt='Stepper Driver' width ='400'/>
 </p>
+
 
 ## Steering
 After experimenting with various steering mechanisms, we decided to settle for a simple yet efficient system of front wheel steering. We chose to use a MG996R servo motor as our key component, favouring it for its wide range of mobility and fast response. The servo is connected pointing downwards to a system of two axles, allowing for a full 360 degrees of rotation.
@@ -148,7 +139,7 @@ float speed = 4000;
 Afterwards we just call the `stepper.runSpeed()` function every loop to ensure that the steppers can constantly turn the wheels and run the vehicle at a steady pace.
 
 
-## Obstacle and Wall Detection
+## Obstacle Management
 First, we set the speed of the stepper, and turn on the HuskyLens and switch to the color recognition algorithm.
 ```
 void setup() {
