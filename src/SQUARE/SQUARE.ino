@@ -53,7 +53,7 @@ void setup() {
   }
   // delay(2000);
   t = millis();
-  pinMode(startBtn), INPUT_PULLUP);
+  pinMode(startBtn, INPUT_PULLUP);
   while(digitalRead(startBtn) == LOW){}
   Serial.println("start");
 }
