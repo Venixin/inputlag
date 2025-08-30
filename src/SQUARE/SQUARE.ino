@@ -20,6 +20,7 @@ int blueID = 2;
 int yellowID = 1;
 bool turning = false;
 int startBtn = 7;
+int cycle = 0;
 // Create a new instance of the AccelStepper class:
 AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
 
@@ -66,7 +67,6 @@ void loop() {
   if (check && n%5000 == 0){
     n = 0;
     if (huskylens.requestBlocks()){
-      Serial.println("checking");
       int yellowCount = huskylens.count(yellowID);
       int blueCount = huskylens.count(blueID);
       if (yellowCount > 0 && blueCount > 0){
@@ -74,7 +74,6 @@ void loop() {
         HUSKYLENSResult blueResult = huskylens.getBlock(blueID, 0);
         
         left = yellowResult.yCenter > blueResult.yCenter;
-        Serial.println(left);
         check = false;
       }
     }
