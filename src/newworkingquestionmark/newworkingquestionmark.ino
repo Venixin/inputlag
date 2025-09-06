@@ -19,6 +19,7 @@ AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
 bool turned = false;
 Servo myservo;
 float speed = 2000;
+int turn = 0;
 
 void setup(){
   pingTimer = millis();
@@ -27,12 +28,12 @@ void setup(){
   stepper.setSpeed(speed);
 
   myservo.attach(9);
-  myservo.write(100);
+  Serial.print(myservo.read());
+  myservo.write(100);myservo.write(100);
   delay(1000);
   t = millis();
 
   Serial.begin(9600);
-
 
 }
 
@@ -71,7 +72,11 @@ long echoCheck() {  // Timer2 interrupt calls this function every 24uS where you
 }
 
 void loop() {
-
+  if (turn >= 13){
+    delay(300);
+    stepper.stop();
+    while(true){}
+  }
   if (millis() >= pingTimer) {    // pingSpeed milliseconds since last ping, do another ping.
       pingTimer += pingSpeed;       // Set the next ping time.
       sonar.ping_timer(echoCheck);  // Send out the ping, calls "echoCheck" function every 24uS where you can check the ping status.
@@ -85,14 +90,25 @@ void loop() {
     // Serial.println(distance);
 
     stepper.runSpeed();
+    for (int i = 0; i < 5; i++){
+      Serial.print(dists[i]);
+      Serial.print(" ");
+    }
+    Serial.print(distcheck(dists));Serial.print(" ");Serial.print(turned);Serial.print(" ");Serial.print(millis()-t);
+    Serial.println();
+
+
     if (distcheck(dists) && !turned) {
       myservo.write(55);
+      myservo.write(55);
+      myservo.write(55);
+      turn+=1;
       // Serial.println("turn");
       turned = true;
       t = millis();
     }
 
-    if (millis() - t >= 802 && !distcheck(dists)) {
+    if (millis() - t >= 900 && !distcheck(dists)) {
       myservo.write(100);
       stepper.runSpeed();
       turned = false;
