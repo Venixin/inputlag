@@ -22,7 +22,9 @@ void display(int id) {
 // Motor interface type must be set to 1 when using a driver:
 #define dirPin 2
 #define stepPin 3
-#define motorInterfaceType 1
+  #define motorInterfaceType 1
+  #define startBtn 7
+
 int x = 10;
 int y = 1;
 int t;
@@ -58,6 +60,7 @@ void setup() {
   stepper.setAcceleration(speed);
   stepper.setSpeed(speed);
 
+  myservo.write(100);
   // Setup steering servo
   myservo.attach(9);
   // reset to forward
@@ -77,6 +80,9 @@ void setup() {
   if (!huskylens.writeAlgorithm(ALGORITHM_COLOR_RECOGNITION)) {
     Serial.print("Failed to set algorithm");
   }
+  pinMode(startBtn, INPUT_PULLUP);
+  while (digitalRead(startBtn) == LOW) { myservo.write(100); }
+  Serial.println("start");
 }
 
 
