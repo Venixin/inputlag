@@ -4,11 +4,8 @@
 #include <MobaTools.h>
 HUSKYLENS huskylens;
 
-// Define stepper motor connections and motor interface type.
-// Motor interface type must be set to 1 when using a driver:
 #define dirPin 2
 #define stepPin 3
-#define motorInterfaceType 1
 #define yellowID 1
 #define blueID 2
 #define redID 3
@@ -27,13 +24,10 @@ int blueCount = 0;
 bool leftcheck = true;
 int turn = 0;
 const int stepsPerRev = 4000;
-Servo myservo;                               // create servo object to control a servo
-MoToStepper stepper1(stepsPerRev, STEPDIR);  // create a stepper instance
+Servo myservo;                              // create servo object to control a servo
+MoToStepper stepper(stepsPerRev, STEPDIR);  // create a stepper instance
 
 void setup() {
-
-
-  // Set the maximum speed and acceleration:
   Wire.begin();
   Serial.begin(9600);
   // Setup steering servo
@@ -56,10 +50,10 @@ void setup() {
     // Serial.println(digitalRead(startBtn));
   }
   Serial.println("start");
-  stepper1.attach(stepPin, dirPin);
-  stepper1.setSpeed(2000);   // 30 rev/min (if stepsPerRev is set correctly)
+  stepper.attach(stepPin, dirPin);
+  stepper.setSpeed(2000);  // 30 rev/min (if stepsPerRev is set correctly)
 
-  stepper1.rotate(1);
+  stepper.rotate(1);
 }
 
 void turn_right() {
@@ -85,6 +79,26 @@ void turn_left() {
   delay(900);
   myservo.write(100);
 }
+
+void parallelParkLeft() {
+  stepper.rotate(-1);
+  myservo.write(50);
+  delay(1650);
+  stepper.rotate(0);
+  delay(100);
+  myservo.write(150);
+  stepper.rotate(-1);
+  delay(1650);
+  stepper.rotate(0);
+  delay(100);
+  myservo.write(100);
+  stepper.rotate(1);
+  delay(500);
+  while (true) {
+    stepper.rotate(0);
+  }
+}
+
 // myservo.write(100) is straight
 void loop() {
 
@@ -106,9 +120,6 @@ void loop() {
     redCount = huskylens.count(redID);
     greenCount = huskylens.count(greenID);
 
-    Serial.print(redCount > 0);
-    Serial.print(" ");
-    Serial.println(greenCount > 0);
     if (greenCount >= 1 && redCount >= 1) {
       HUSKYLENSResult redResult = huskylens.getBlock(redID, 0);
       HUSKYLENSResult greenResult = huskylens.getBlock(greenID, 0);
@@ -137,19 +148,26 @@ void loop() {
       }
     }
     if (yellowCount == 0 && redCount == 0 && greenCount == 0 && blueCount > 0) {
-      if (left) {
+      if (left && turn < 12) {
         myservo.write(65);
         delay(2000);
         myservo.write(100);
         turn += 1;
       }
     } else if (yellowCount > 0 && redCount == 0 && greenCount == 0 && blueCount == 0) {
-      if (!left) {
+      if (!left && turn < 12) {
         myservo.write(135);
         delay(2000);
         myservo.write(100);
         turn += 1;
       }
     }
+  }
+  if (turn == 13) {
+    stepper.rotate(-1);
+    delay(3250);
+    stepper.rotate(0);
+    delay(100);
+    parallelParkLeft();
   }
 }
