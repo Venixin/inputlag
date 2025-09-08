@@ -1,45 +1,59 @@
 #include <Servo.h>
-#include <SoftwareSerial.h>
-#include <AccelStepper.h>
+#include <Wire.h>
+#include <MobaTools.h>
 #include <NewPing.h>
+#include <HUSKYLENS.h>
 
-#define yellowID 3
-#define blueID 4
 #define dirPin 2
 #define stepPin 3
-#define motorInterfaceType 1
 #define startBtn 7
+#define yellowID 1
+#define blueID 2
 const unsigned int TRIG_PIN = 13;
 const unsigned int ECHO_PIN = 12;
-int dists[5] = { -1, -2, -3, -4, -5 };
-long distance;
+int dists[10];
+
+float duration, distance;
 int curr = 0;
-NewPing sonar(TRIG_PIN, ECHO_PIN);
 unsigned int pingSpeed = 29;
 unsigned long pingTimer;
 unsigned long t;
-AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
+bool left = true;
+bool leftcheck = true;
 bool turned = false;
-Servo myservo;
-float speed = 2000;
+const int stepsPerRev = 720;
 int turn = 0;
+int yellowCount = 0;
+int blueCount = 0;
 
-void setup(){
+MoToStepper stepper(stepsPerRev, STEPDIR);
+HUSKYLENS huskylens;
+Servo myservo;
+void setup() {
+  Wire.begin();
+  while (!huskylens.begin(Wire)) {
+    Serial.println("Begin failed!");
+    Serial.println("1.Please recheck the \"Protocol Type\" in HUSKYLENS (General Settings>>Protocol Type>> I2C)");
+    Serial.println("2.Please recheck the connection.");
+    delay(1250);
+  }
+
+  if (!huskylens.writeAlgorithm(ALGORITHM_COLOR_RECOGNITION)) {
+    Serial.print("Failed to set algorithm");
+  }
+  Serial.println("huskylens done");
   pingTimer = millis();
-  stepper.setMaxSpeed(speed);
-  stepper.setAcceleration(speed);
-  stepper.setSpeed(speed);
-
   myservo.attach(9);
-  Serial.print(myservo.read());
-  myservo.write(100);myservo.write(100);
-  delay(1000);
-  t = millis();
-
+  stepper.attach(stepPin, dirPin);
+  stepper.setSpeed(7200);
   Serial.begin(9600);
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
   pinMode(startBtn, INPUT_PULLUP);
-  while (digitalRead(startBtn) == LOW) { myservo.write(100); }
+  while (digitalRead(startBtn) == HIGH) { myservo.write(100); }
   Serial.println("start");
+
+  stepper.rotate(1);
 }
 
 bool distcheck(int arr[]) {
@@ -48,11 +62,8 @@ bool distcheck(int arr[]) {
   }
   int high = 0;
   int low = 0;
-  for (int i = 0; i < 4; i++) {
-    if ((arr[i + 1] - arr[i]) > 0) {
-      high += 1;
-    } else if (arr[i] < 50
-    ) {
+  for (int i = 0; i < 9; i++) {
+    if (arr[i] < 50) {
       low += 1;
     } else {
       high += 1;
@@ -65,73 +76,61 @@ bool distcheck(int arr[]) {
   }
 }
 bool start = true;
-long echoCheck() {  // Timer2 interrupt calls this function every 24uS where you can check the ping status.
-  // Don't do anything here!
-  if (sonar.check_timer()) {  // This is how you check to see if the ping was received.
-    // Here's where you can add code.
-    
-    distance = sonar.ping_result / US_ROUNDTRIP_CM;
-    Serial.print("Ping: ");
-    Serial.print(sonar.ping_result / US_ROUNDTRIP_CM);  // Ping returned, uS result in ping_result, convert to cm with US_ROUNDTRIP_CM.
-    Serial.println("cm");
-  }
-}
 
 bool dircheck = false;
 int turndir;
 
 void loop() {
-  if (millis() >= pingTimer) {    // pingSpeed milliseconds since last ping, do another ping.
-      pingTimer += pingSpeed;       // Set the next ping time.
-      sonar.ping_timer(echoCheck);  // Send out the ping, calls "echoCheck" function every 24uS where you can check the ping status.
+  if (leftcheck) {
+    if (huskylens.request()) {
+      yellowCount = huskylens.count(yellowID);
+      blueCount = huskylens.count(blueID);
+      if (yellowCount >= 1 && blueCount >= 1) {
+        HUSKYLENSResult yellowResult = huskylens.getBlock(yellowID, 0);
+        HUSKYLENSResult blueResult = huskylens.getBlock(blueID, 0);
+        if (yellowResult.yCenter < blueResult.yCenter) {
+          left = false;
+        } else {
+          left = true;
+        }
+        leftcheck = false;
+      }
     }
+  }
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
 
-    if (curr >= 5) {
-      curr = 0;
+  duration = pulseIn(ECHO_PIN, HIGH);
+  distance = duration / 29 / 2;
+
+  dists[curr] = distance;
+  curr += 1;
+  if (curr == 10) {
+    curr = 0;
+  }
+  delay(100);
+  if (distcheck(dists)) {
+    if (left) {
+      myservo.write(65);
+    } else {
+      myservo.write(135);
     }
-    dists[curr] = distance;
-    curr += 1;
-    // Serial.println(distance);
-
-    stepper.runSpeed();
-    // for (int i = 0; i < 5; i++){
-    //   Serial.print(dists[i]);
-    //   Serial.print(" ");
-    // }
-    // Serial.print(distcheck(dists));Serial.print(" ");Serial.print(turned);Serial.print(" ");Serial.print(millis()-t);
-    // Serial.println();
-    // if (not dircheck){
-    //   if (cycle >= 0) {
-    //   n += 1;
-
-    //   if (n >= 10000 == 0 && n != 0) {
-    //     n = 0;
-    //     if (huskylens.requestBlocks()) {
-          
-
-    // }
-
-
-    if (distcheck(dists) && !turned && !start) {
-      myservo.write(55);
-      turn+=1;
-      // Serial.println("turn");
-      turned = true;
-      t = millis();
-    }
-
-    if (millis() - t >= 933 && !distcheck(dists)) {
-      myservo.write(100);
-      stepper.runSpeed();
-      turned = false;
-    }
-  stepper.runSpeed();
-  start = false;
-  if (turn >= 13){
-  delay(300);
-  stepper.stop();
-  while(true){}
+    turned = true;
+  } else if (turned) {
+    turn += 1;
+    turned = false;
+    Serial.println(turn);
+    delay(450);
+    myservo.write(100);
   }
 
-
+  if (turn >= 13) {
+    stepper.rotate(-1);
+    delay(3000);
+    stepper.rotate(0);
+    while (true) {}
+  }
 }

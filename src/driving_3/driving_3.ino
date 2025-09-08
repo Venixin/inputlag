@@ -44,14 +44,14 @@ void setup() {
     Serial.print("Failed to set algorithm");
   }
   Serial.println("huskylens done");
+  stepper.attach(stepPin, dirPin);
+  stepper.setSpeed(2000);  
   pinMode(startBtn, INPUT_PULLUP);
   while (digitalRead(startBtn) == 1) {
     myservo.write(100);
     // Serial.println(digitalRead(startBtn));
   }
   Serial.println("start");
-  stepper.attach(stepPin, dirPin);
-  stepper.setSpeed(2000);  // 30 rev/min (if stepsPerRev is set correctly)
 
   stepper.rotate(1);
 }
