@@ -98,7 +98,24 @@ void parallelParkLeft() {
     stepper.rotate(0);
   }
 }
-
+void parallelParkRight() {
+  stepper.rotate(-1);
+  myservo.write(150);
+  delay(1650);
+  stepper.rotate(0);
+  delay(100);
+  myservo.write(50);
+  stepper.rotate(-1);
+  delay(1650);
+  stepper.rotate(0);
+  delay(100);
+  myservo.write(100);
+  stepper.rotate(1);
+  delay(500);
+  while (true) {
+    stepper.rotate(0);
+  }
+}
 // myservo.write(100) is straight
 void loop() {
 
@@ -168,6 +185,11 @@ void loop() {
     delay(3250);
     stepper.rotate(0);
     delay(100);
-    parallelParkLeft();
+    if (!left){
+      parallelParkLeft();
+    }
+    else{
+      parallelParkRight();
+    }
   }
 }
