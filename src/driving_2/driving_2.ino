@@ -33,7 +33,16 @@ bool count = true;
 const int stepsPerRev = 4000;
 Servo myservo;                               // create servo object to control a servo
 MoToStepper stepper1(stepsPerRev, STEPDIR);  // create a stepper instance
-
+long echoCheck() {  // Timer2 interrupt calls this function every 24uS where you can check the ping status.
+  // Don't do anything here!
+  if (sonar.check_timer()) {  // This is how you check to see if the ping was received.
+    // Here's where you can add code.
+    distance = sonar.ping_result / US_ROUNDTRIP_CM;
+    Serial.print("Ping: ");
+    Serial.print(sonar.ping_result / US_ROUNDTRIP_CM);  // Ping returned, uS result in ping_result, convert to cm with US_ROUNDTRIP_CM.
+    Serial.println("cm");
+  }
+}
 void setup() {
 
 

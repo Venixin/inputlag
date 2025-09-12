@@ -21,7 +21,7 @@ unsigned long t;
 bool left = true;
 bool leftcheck = true;
 bool turned = false;
-const int stepsPerRev = 720;
+const int stepsPerRev = 200;
 int turn = 0;
 int yellowCount = 0;
 int blueCount = 0;
@@ -30,6 +30,7 @@ MoToStepper stepper(stepsPerRev, STEPDIR);
 HUSKYLENS huskylens;
 Servo myservo;
 void setup() {
+  Serial.begin(9600);
   Wire.begin();
   while (!huskylens.begin(Wire)) {
     Serial.println("Begin failed!");
@@ -45,15 +46,17 @@ void setup() {
   pingTimer = millis();
   myservo.attach(9);
   stepper.attach(stepPin, dirPin);
-  stepper.setSpeed(7200);
-  Serial.begin(9600);
+  stepper.setSpeed(500);
+  stepper.setRampLen(stepsPerRev / 4);
+
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
   pinMode(startBtn, INPUT_PULLUP);
   while (digitalRead(startBtn) == HIGH) { myservo.write(100); }
-  Serial.println("start");
 
+  myservo.write(100);
   stepper.rotate(1);
+  Serial.println("start");
 }
 
 bool distcheck(int arr[]) {
@@ -85,15 +88,24 @@ void loop() {
     if (huskylens.request()) {
       yellowCount = huskylens.count(yellowID);
       blueCount = huskylens.count(blueID);
-      if (yellowCount >= 1 && blueCount >= 1) {
-        HUSKYLENSResult yellowResult = huskylens.getBlock(yellowID, 0);
-        HUSKYLENSResult blueResult = huskylens.getBlock(blueID, 0);
-        if (yellowResult.yCenter < blueResult.yCenter) {
+      if (leftcheck) {
+        if (yellowCount >= 1) {
           left = false;
-        } else {
+          leftcheck = false;
+        } else if (blueCount >= 1) {
           left = true;
+          leftcheck = false;
         }
-        leftcheck = false;
+        if (yellowCount >= 1 && blueCount >= 1) {
+          HUSKYLENSResult yellowResult = huskylens.getBlock(yellowID, 0);
+          HUSKYLENSResult blueResult = huskylens.getBlock(blueID, 0);
+          if (yellowResult.yCenter < blueResult.yCenter) {
+            left = false;
+          } else {
+            left = true;
+          }
+          leftcheck = false;
+        }
       }
     }
   }
@@ -102,7 +114,7 @@ void loop() {
   digitalWrite(TRIG_PIN, HIGH);
   delayMicroseconds(10);
   digitalWrite(TRIG_PIN, LOW);
-
+  Serial.println("pulsed");
   duration = pulseIn(ECHO_PIN, HIGH);
   distance = duration / 29 / 2;
 
@@ -111,8 +123,9 @@ void loop() {
   if (curr == 10) {
     curr = 0;
   }
-  delay(100);
+  Serial.println(distance);
   if (distcheck(dists)) {
+    Serial.println("turned");
     if (left) {
       myservo.write(65);
     } else {
@@ -122,12 +135,11 @@ void loop() {
   } else if (turned) {
     turn += 1;
     turned = false;
-    Serial.println(turn);
     delay(450);
     myservo.write(100);
   }
 
-  if (turn >= 13) {
+  if (turn >= 1300) {
     stepper.rotate(-1);
     delay(3000);
     stepper.rotate(0);
